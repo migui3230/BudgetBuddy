@@ -1,6 +1,2 @@
-myenv/
-.env
-server/bookapp/__pycache__
-server/django_psdb_engine/__pycache__
+myenv
 server/server/__pycache__
-*.pyc
