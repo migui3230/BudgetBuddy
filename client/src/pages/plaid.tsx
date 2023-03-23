@@ -34,6 +34,8 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
           access_token: accessToken,
         });
 
+        // console.log("TRANSACTIONS", transactions.data);
+
         setTransactions(transactions.data);
 
         setAccount(auth.data.numbers.ach[0]);
@@ -49,6 +51,7 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
     <>
       <p>Account number: {account.account}</p>
       <p>Routing number: {account.routing}</p>
+      <p>Account info: {transactions.accounts[0].account_id} </p>
     </>
   ) : (
     <p>failed api request</p>
