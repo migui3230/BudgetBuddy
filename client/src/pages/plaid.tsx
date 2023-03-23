@@ -9,6 +9,7 @@ type PlaidAuthProps = {
 const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
   const [account, setAccount] = useState();
   const [accessToken, setAccessToken] = useState();
+  const [transactions, setTransactions] = useState();
 
   useEffect(() => {
     async function getAccessToken() {
@@ -18,16 +19,22 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
         });
         // wait 1 second for the api to respond
         await new Promise((resolve) => setTimeout(resolve, 1000));
-        console.log("RESPONSE", response);
+        // console.log("RESPONSE", response);
 
-        // problem is im not getting the access token
         const accessToken = response.data.accessToken;
         setAccessToken(accessToken);
-        console.log("ACCESS TOKEN", accessToken);
+        // console.log("ACCESS TOKEN", accessToken);
 
         const auth = await axios.post("/api/auth", {
           access_token: accessToken,
         });
+
+        // ? this gives me balance info but no transaction
+        const transactions = await axios.post("/api/transactions", {
+          access_token: accessToken,
+        });
+
+        setTransactions(transactions.data);
 
         setAccount(auth.data.numbers.ach[0]);
       } catch (error) {
@@ -56,7 +63,7 @@ export default function Plaid() {
   useEffect(() => {
     async function getLinkToken() {
       const res = await axios.get("/api/create-link-token");
-      console.log("RES", res);
+      // console.log("RES", res);
 
       setLinkToken(res.data.link_token);
     }

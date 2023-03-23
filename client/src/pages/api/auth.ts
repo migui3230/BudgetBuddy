@@ -8,7 +8,7 @@ export default async function handler(
 ) {
   try {
     const accessToken = req.body.access_token;
-    console.log("accessToken", accessToken);
+    // console.log("accessToken", accessToken);
 
     const plaidResponse = await plaidClient.authGet({
       access_token: accessToken,

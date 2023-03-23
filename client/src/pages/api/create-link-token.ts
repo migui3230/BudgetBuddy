@@ -4,6 +4,7 @@ dotenv.config();
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Configuration, PlaidApi, PlaidEnvironments } from "plaid";
 
+// ! sandbox config
 const config = new Configuration({
   basePath: PlaidEnvironments.sandbox,
   baseOptions: {
@@ -13,6 +14,19 @@ const config = new Configuration({
     },
   },
 });
+
+// ! development config
+// const config = new Configuration({
+//   basePath: PlaidEnvironments.development,
+//   baseOptions: {
+//     headers: {
+//       "PLAID-CLIENT-ID": process.env.PLAID_CLIENT_ID,
+//       "PLAID-SECRET": process.env.PLAID_DEVELOPMENT_SECRET,
+//     },
+//   },
+// });
+
+// console.log("config", config);
 
 export const plaidClient = new PlaidApi(config);
 
