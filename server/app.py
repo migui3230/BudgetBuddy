@@ -24,6 +24,20 @@ db = MySQLdb.connect(
 
 # TODO: create a table for users that have username, email, role
 
+""" 
+CREATE TABLE IF NOT EXISTS users (
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  email VARCHAR(255) NOT NULL,
+  username VARCHAR(255) NOT NULL,
+  role ENUM('user', 'admin', 'pro') NOT NULL DEFAULT 'user',
+  PRIMARY KEY (id),
+  UNIQUE KEY email (email),
+  UNIQUE KEY username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+"""
+
 
 @ app.route('/')
 def index():
