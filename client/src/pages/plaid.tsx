@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlaidLink } from "react-plaid-link";
+import { log } from "console";
 
 type PlaidAuthProps = {
   publicToken: string;
@@ -10,6 +11,8 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
   const [account, setAccount] = useState();
   const [accessToken, setAccessToken] = useState();
   const [transactions, setTransactions] = useState();
+  console.log("account: ", account);
+  console.log("transactions: ", transactions);
 
   useEffect(() => {
     async function getAccessToken() {
@@ -51,7 +54,10 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
     <>
       <p>Account number: {account.account}</p>
       <p>Routing number: {account.routing}</p>
-      <p>Account info: {transactions.accounts[0].account_id} </p>
+      <p>Account_id: {account.account_id}</p>
+      <p>Wire routing number: {account.wire_routing}</p>
+
+      <p>Current balance: {transactions.accounts[0].balances.current} </p>
     </>
   ) : (
     <p>failed api request</p>

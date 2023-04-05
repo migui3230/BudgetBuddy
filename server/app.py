@@ -38,6 +38,11 @@ CREATE TABLE IF NOT EXISTS users (
 
 """
 
+""" 
+the value proposition of the app is that you can see all your accounts in one place
+
+"""
+
 
 @ app.route('/')
 def index():
