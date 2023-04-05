@@ -7,6 +7,7 @@ type PlaidAuthProps = {
   publicToken: string;
 };
 
+// TODO: render specific data we want for the user based on role
 const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
   const [account, setAccount] = useState();
   const [accessToken, setAccessToken] = useState();
