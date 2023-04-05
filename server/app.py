@@ -1,10 +1,12 @@
 import MySQLdb
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
+CORS(app)
 
 db = MySQLdb.connect(
     host=os.getenv("HOST"),
@@ -28,7 +30,6 @@ db = MySQLdb.connect(
 CREATE TABLE IF NOT EXISTS users (
   id INT(11) NOT NULL AUTO_INCREMENT,
   email VARCHAR(255) NOT NULL,
-  username VARCHAR(255) NOT NULL,
   role ENUM('user', 'admin', 'pro') NOT NULL DEFAULT 'user',
   PRIMARY KEY (id),
   UNIQUE KEY email (email),
@@ -60,6 +61,13 @@ def index():
     cursor.close()
     db.close()
     return 'data added!'
+
+
+@app.route('/api/addUser', methods=['POST'])
+def addUser():
+    data = request.get_json()
+    print(data)
+    return jsonify(data)
 
 
 if __name__ == '__main__':
