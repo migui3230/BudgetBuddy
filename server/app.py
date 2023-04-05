@@ -26,18 +26,6 @@ db = MySQLdb.connect(
 
 # TODO: create a table for users that have username, email, role
 
-""" 
-CREATE TABLE IF NOT EXISTS users (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  email VARCHAR(255) NOT NULL,
-  role ENUM('user', 'admin', 'pro') NOT NULL DEFAULT 'user',
-  PRIMARY KEY (id),
-  UNIQUE KEY email (email),
-  UNIQUE KEY username (username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-"""
 
 """ 
 the value proposition of the app is that you can see all your accounts in one place
@@ -66,8 +54,21 @@ def index():
 @app.route('/api/addUser', methods=['POST'])
 def addUser():
     data = request.get_json()
-    print(data)
-    return jsonify(data)
+    email = data['email']
+    role = data['role']
+
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO users (email, role) VALUES (%s, %s)", (email, role))
+    db.commit()
+    cursor.close()
+    db.close()
+
+    response = {
+        "status": "success",
+        "message": "User added successfully"
+    }
+    return jsonify(response)
 
 
 if __name__ == '__main__':

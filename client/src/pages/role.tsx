@@ -20,12 +20,16 @@ export default function Role() {
   //   console.log(userEmail);
 
   const handleClick = async () => {
-    const data = {
-      email: userEmail,
-      role: role,
-    };
+    try {
+      const data = {
+        email: userEmail,
+        role: role,
+      };
 
-    await axios.post("http://127.0.0.1:5000/api/addUser", data);
+      await axios.post("http://127.0.0.1:5000/api/addUser", data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   //   console.log(user);
@@ -33,7 +37,7 @@ export default function Role() {
   return (
     <>
       <Select
-        label="Select your"
+        label="Select your role"
         placeholder="Pick one"
         data={[
           { value: "user", label: "User" },
