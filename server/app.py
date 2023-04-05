@@ -1,6 +1,6 @@
 import MySQLdb
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, json
 from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
@@ -69,6 +69,25 @@ def addUser():
         "message": "User added successfully"
     }
     return jsonify(response)
+
+
+@app.route('/api/getUsers', methods=['GET'])
+def getUsers():
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    cursor.close()
+
+    users = []
+    for row in rows:
+        user = {
+            "id": row[0],
+            "email": row[1],
+            "role": row[2]
+        }
+        users.append(user)
+
+    return jsonify(users)
 
 
 if __name__ == '__main__':

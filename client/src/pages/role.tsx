@@ -2,6 +2,7 @@ import { Button, Select } from "@mantine/core";
 import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import axios from "axios";
+import { useRouter } from "next/router";
 
 /* 
 handleClick function
@@ -17,6 +18,8 @@ export default function Role() {
   //   console.log(role);
   const { user } = useUser();
   const userEmail = user?.emailAddresses[0].emailAddress;
+  const router = useRouter();
+
   //   console.log(userEmail);
 
   const handleClick = async () => {
@@ -27,8 +30,10 @@ export default function Role() {
       };
 
       await axios.post("http://127.0.0.1:5000/api/addUser", data);
+      router.push("/plaid");
     } catch (error) {
       console.log(error);
+      //   router.push("/plaid");
     }
   };
 

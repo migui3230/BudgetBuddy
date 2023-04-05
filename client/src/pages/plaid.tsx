@@ -11,8 +11,10 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
   const [account, setAccount] = useState();
   const [accessToken, setAccessToken] = useState();
   const [transactions, setTransactions] = useState();
-  console.log("account: ", account);
-  console.log("transactions: ", transactions);
+  const [users, setUsers] = useState();
+  // console.log("account: ", account);
+  // console.log("transactions: ", transactions);
+  console.log(users);
 
   useEffect(() => {
     async function getAccessToken() {
@@ -42,6 +44,10 @@ const PlaidAuth = ({ publicToken }: PlaidAuthProps) => {
         setTransactions(transactions.data);
 
         setAccount(auth.data.numbers.ach[0]);
+        const usersFromTable = await axios.get(
+          "http://127.0.0.1:5000/api/getUsers"
+        );
+        setUsers(usersFromTable.data);
       } catch (error) {
         console.error(error);
       }
