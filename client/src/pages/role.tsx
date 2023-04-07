@@ -33,7 +33,7 @@ export default function Role() {
       router.push("/plaid");
     } catch (error) {
       console.log(error);
-      //   router.push("/plaid");
+      router.push("/plaid");
     }
   };
 
