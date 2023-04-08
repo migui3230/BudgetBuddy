@@ -71,23 +71,23 @@ def addUser():
     return jsonify(response)
 
 
-@app.route('/api/getUsers', methods=['GET'])
-def getUsers():
+@app.route('/api/getUserByEmail', methods=['GET'])
+def getUserByEmail():
+    email = request.args.get('email')
     cursor = db.cursor()
-    cursor.execute("SELECT * FROM users")
-    rows = cursor.fetchall()
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    row = cursor.fetchone()
     cursor.close()
 
-    users = []
-    for row in rows:
+    if row:
         user = {
             "id": row[0],
             "email": row[1],
             "role": row[2]
         }
-        users.append(user)
-
-    return jsonify(users)
+        return jsonify(user)
+    else:
+        return jsonify({"error": "User not found"}), 404
 
 
 if __name__ == '__main__':
