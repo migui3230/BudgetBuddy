@@ -11,6 +11,10 @@ export default function Home() {
 
   const { user } = useUser();
 
+  if (user) {
+    router.push("/plaid");
+  }
+
   const routeToSignIn = () => {
     if (user) {
       router.push("/plaid");
