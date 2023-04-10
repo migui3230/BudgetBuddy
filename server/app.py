@@ -8,16 +8,19 @@ load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
-db = MySQLdb.connect(
-    host=os.getenv("HOST"),
-    user=os.getenv("USERNAME"),
-    passwd=os.getenv("PASSWORD"),
-    db=os.getenv("DATABASE"),
-    ssl_mode="VERIFY_IDENTITY",
-    ssl={
-        "ca": "/etc/ssl/cert.pem"
-    }
-)
+
+def get_db_connection():
+    db = MySQLdb.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USERNAME"),
+        passwd=os.getenv("PASSWORD"),
+        db=os.getenv("DATABASE"),
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={
+            "ca": "/etc/ssl/cert.pem"
+        }
+    )
+    return db
 
 
 # TODO: do role based access control for the model
@@ -35,6 +38,7 @@ the value proposition of the app is that you can see all your accounts in one pl
 
 @ app.route('/')
 def index():
+    db = get_db_connection()
     cursor = db.cursor()
     data = [
         ('john.doe@example.com', 'johndoe'),
@@ -56,6 +60,7 @@ def addUser():
     data = request.get_json()
     email = data['email']
     role = data['role']
+    db = get_db_connection()
 
     cursor = db.cursor()
     cursor.execute(
@@ -74,10 +79,12 @@ def addUser():
 @app.route('/api/getUserByEmail', methods=['GET'])
 def getUserByEmail():
     email = request.args.get('email')
+    db = get_db_connection()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
     row = cursor.fetchone()
     cursor.close()
+    db.close()
 
     if row:
         user = {

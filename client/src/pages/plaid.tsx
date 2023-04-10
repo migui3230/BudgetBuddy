@@ -6,6 +6,45 @@ import { useMemo } from "react";
 import React from "react";
 import { table } from "console";
 
+type Balance = {
+  available: number;
+  current: number;
+  iso_currency_code: string;
+  limit: null;
+  unofficial_currency_code: null;
+};
+
+type Account = {
+  account_id: string;
+  balances: Balance;
+  mask: string;
+  name: string;
+  official_name: string;
+  subtype: string;
+  type: string;
+};
+
+type Item = {
+  available_products: string[];
+  billed_products: string[];
+  consent_expiration_time: null;
+  error: null;
+  institution_id: string;
+  item_id: string;
+  optional_products: null;
+  products: string[];
+  update_type: string;
+  webhook: string;
+};
+
+type TransactionsResponse = {
+  accounts: Account[];
+  item: Item;
+  request_id: string;
+  total_transactions: number;
+  transactions: any[]; // You can replace 'any' with a more specific type if you have information about the transaction objects
+};
+
 type UserData = {
   email: string;
   role: "user" | "pro" | "admin";
@@ -14,8 +53,8 @@ type UserData = {
 
 type PlaidAuthProps = {
   publicToken: string;
-  account: any;
-  transactions: any;
+  account: any; // You can replace 'any' with a more specific type if you have information about the account objects
+  transactions: TransactionsResponse;
   tableUsers: UserData;
 };
 
@@ -27,15 +66,13 @@ const PlaidAuthComponent = ({
 }: PlaidAuthProps) => {
   // filter for the specific user based on the clerk email
   const { user } = useUser();
-  const userEmail = user?.emailAddresses[0].emailAddress;
-  console.log(userEmail);
-  console.log(tableUser);
+  // console.log(tableUser);
   // wait 1 second
   setTimeout(() => {
     console.log("waited 1 second");
   }, 1000);
 
-  const userRole = tableUser.role;
+  const userRole = tableUser?.role;
   console.log(userRole);
 
   // console.log("userRole", userRole);
@@ -43,9 +80,32 @@ const PlaidAuthComponent = ({
   if (userRole === "user") {
     // only render one account from the plaid api
     // only render the first item from the transactions array
+    const firstAccount = transactions.accounts[0];
+    return (
+      <>
+        <p>Account ID: {firstAccount.account_id}</p>
+        <p>Account number: {firstAccount.account_id}</p>
+        <p>Current balance: {firstAccount.balances.current} </p>
+        <p>Account name: {firstAccount.name} </p>
+        <p>Account type: {firstAccount.subtype}</p>
+      </>
+    );
   } else if (userRole === "pro") {
     // render all accounts from the plaid api
     // map over the transactions array and render each item
+    return (
+      <>
+        {transactions.accounts.map((account) => (
+          <div key={account.account_id}>
+            <p>Account ID: {account.account_id}</p>
+            <p>Account number: {account.account_id}</p>
+            <p>Current balance: {account.balances.current} </p>
+            <p>Account name: {account.name} </p>
+            <p>Account type: {account.subtype}</p>
+          </div>
+        ))}
+      </>
+    );
   } else if (userRole === "admin") {
     // render admin page / user management dashboard
   }
@@ -74,9 +134,6 @@ export default function Plaid() {
   const [transactions, setTransactions] = useState();
   const [users, setUsers] = useState();
   const { user } = useUser();
-
-  // TODO: check what the shape of the data looks like then render the plaidauth component from that
-  console.log("transactions", transactions);
 
   useEffect(() => {
     async function getLinkToken() {
@@ -148,8 +205,8 @@ export default function Plaid() {
     <PlaidAuth
       publicToken={publicToken}
       account={account}
-      transactions={transactions}
-      tableUsers={users}
+      transactions={transactions as unknown as TransactionsResponse}
+      tableUsers={users as unknown as UserData}
     />
   ) : (
     <button onClick={() => open()} disabled={!ready}>
