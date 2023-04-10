@@ -1,60 +1,113 @@
 import MySQLdb
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, json
+from flask_cors import CORS
 from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-
-db = MySQLdb.connect(
-    host=os.getenv("HOST"),
-    user=os.getenv("USERNAME"),
-    passwd=os.getenv("PASSWORD"),
-    db=os.getenv("DATABASE"),
-    ssl_mode="VERIFY_IDENTITY",
-    ssl={
-        "ca": "/etc/ssl/cert.pem"
-    }
-)
+CORS(app)
 
 
-# TODO: do role based access control for the model
-# TODO: change access to APIs based on the role
-# TODO: once the user logs in via clerk, fetch the data for that user
+def get_db_connection():
+    db = MySQLdb.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USERNAME"),
+        passwd=os.getenv("PASSWORD"),
+        db=os.getenv("DATABASE"),
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={
+            "ca": "/etc/ssl/cert.pem"
+        }
+    )
+    return db
 
-# TODO: create a table for users that have username, email, role
 
 """ 
-CREATE TABLE IF NOT EXISTS users (
-  id INT(11) NOT NULL AUTO_INCREMENT,
-  email VARCHAR(255) NOT NULL,
-  username VARCHAR(255) NOT NULL,
-  role ENUM('user', 'admin', 'pro') NOT NULL DEFAULT 'user',
-  PRIMARY KEY (id),
-  UNIQUE KEY email (email),
-  UNIQUE KEY username (username)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
+the value proposition of the app is that you can see all your accounts in one place
 
 """
 
 
-@ app.route('/')
-def index():
-    cursor = db.cursor()
-    data = [
-        ('john.doe@example.com', 'johndoe'),
-        ('jane.smith@example.com', 'janesmith'),
-        ('jimmy.kim@example.com', 'jimmykim')
-    ]
-    for d in data:
-        cursor.execute(
-            "INSERT INTO users (email, username) VALUES (%s, %s)", d)
+@app.route('/api/addUser', methods=['POST'])
+def addUser():
+    data = request.get_json()
+    email = data['email']
+    role = data['role']
+    db = get_db_connection()
 
+    cursor = db.cursor()
+    cursor.execute(
+        "INSERT INTO users (email, role) VALUES (%s, %s)", (email, role))
     db.commit()
     cursor.close()
     db.close()
-    return 'data added!'
+
+    response = {
+        "status": "success",
+        "message": "User added successfully"
+    }
+    return jsonify(response)
+
+
+@app.route('/api/getUserByEmail', methods=['GET'])
+def getUserByEmail():
+    email = request.args.get('email')
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = %s", (email,))
+    row = cursor.fetchone()
+    cursor.close()
+    db.close()
+
+    if row:
+        user = {
+            "id": row[0],
+            "email": row[1],
+            "role": row[2]
+        }
+        return jsonify(user)
+    else:
+        return jsonify({"error": "User not found"}), 404
+
+
+@app.route('/api/getAllUsers', methods=['GET'])
+def getAllUsers():
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    cursor.close()
+    db.close()
+
+    users = []
+    for row in rows:
+        user = {
+            "id": row[0],
+            "email": row[1],
+            "role": row[2]
+        }
+        users.append(user)
+    return jsonify(users)
+
+
+@app.route('/api/updateUsers', methods=['POST'])
+def updateUsers():
+    data = request.get_json()
+    db = get_db_connection()
+    cursor = db.cursor()
+    for d in data:
+        cursor.execute(
+            "UPDATE users SET role = %s WHERE email = %s", (d['role'], d['email']))
+    db.commit()
+    cursor.close()
+    db.close()
+
+    response = {
+        "status": "success",
+        "message": "Users updated successfully"
+    }
+    return jsonify(response)
 
 
 if __name__ == '__main__':
