@@ -4,16 +4,27 @@ import { Inter } from "@next/font/google";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { Button } from "@mantine/core";
+import { useUser } from "@clerk/nextjs";
 
 export default function Home() {
   const router = useRouter();
 
+  const { user } = useUser();
+
   const routeToSignIn = () => {
-    router.push("/sign-in");
+    if (user) {
+      router.push("/plaid");
+    } else {
+      router.push("/sign-in");
+    }
   };
 
   const routeToSignUp = () => {
-    router.push("/sign-up");
+    if (user) {
+      router.push("/plaid");
+    } else {
+      router.push("/sign-up");
+    }
   };
 
   return (

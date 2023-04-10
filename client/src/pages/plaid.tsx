@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlaidLink } from "react-plaid-link";
-import { useUser } from "@clerk/nextjs";
+import { useUser, UserButton } from "@clerk/nextjs";
 import { useMemo } from "react";
 import React from "react";
 import { table } from "console";
+import { Select, Button } from "@mantine/core";
+import { Router, useRouter } from "next/router";
 
 type Balance = {
   available: number;
@@ -68,18 +70,17 @@ const PlaidAuthComponent = ({
   const { user } = useUser();
   // console.log(tableUser);
   // wait 1 second
-  setTimeout(() => {
-    console.log("waited 1 second");
-  }, 1000);
 
   const userRole = tableUser?.role;
-  console.log(userRole);
 
   // console.log("userRole", userRole);
+  // TODO: figure out how to log people out in clerk
+
+  if (!account || !userRole) {
+    return <p>loading...</p>;
+  }
 
   if (userRole === "user") {
-    // only render one account from the plaid api
-    // only render the first item from the transactions array
     const firstAccount = transactions.accounts[0];
     return (
       <>
@@ -91,8 +92,6 @@ const PlaidAuthComponent = ({
       </>
     );
   } else if (userRole === "pro") {
-    // render all accounts from the plaid api
-    // map over the transactions array and render each item
     return (
       <>
         {transactions.accounts.map((account) => (
@@ -106,21 +105,9 @@ const PlaidAuthComponent = ({
         ))}
       </>
     );
-  } else if (userRole === "admin") {
-    // render admin page / user management dashboard
   }
 
-  return account ? (
-    <>
-      <p>Account number: {account.account}</p>
-      <p>Routing number: {account.routing}</p>
-      <p>Account_id: {account.account_id}</p>
-      <p>Wire routing number: {account.wire_routing}</p>
-      <p>Current balance: {transactions.accounts[0].balances.current} </p>
-    </>
-  ) : (
-    <p>loading...</p>
-  );
+  return <p>nothing</p>;
 };
 
 const PlaidAuth = React.memo(PlaidAuthComponent);
@@ -192,7 +179,47 @@ export default function Plaid() {
       }
     }
     getUserByEmail();
+  }, [user]);
+
+  const [allUsers, setAllUsers] = useState<UserData[]>([]);
+
+  useEffect(() => {
+    async function getAllUsers() {
+      try {
+        const response = await axios.get(
+          "http://127.0.0.1:5000/api/getAllUsers"
+        );
+        setAllUsers(response.data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    getAllUsers();
   }, []);
+
+  const handleRoleChange = (
+    newRole: "user" | "pro" | "admin",
+    userId: number
+  ) => {
+    setAllUsers(
+      allUsers.map((user) =>
+        user.id === userId ? { ...user, role: newRole } : user
+      )
+    );
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/updateUsers",
+        allUsers.map(({ email, role }) => ({ email, role }))
+      );
+      console.log(response.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const { open, ready } = usePlaidLink({
     token: linkToken || null,
@@ -201,16 +228,56 @@ export default function Plaid() {
     },
   });
 
-  return publicToken ? (
-    <PlaidAuth
-      publicToken={publicToken}
-      account={account}
-      transactions={transactions as unknown as TransactionsResponse}
-      tableUsers={users as unknown as UserData}
-    />
-  ) : (
-    <button onClick={() => open()} disabled={!ready}>
-      Open Link and connect your bank!
-    </button>
-  );
+  // @ts-ignore
+  const userRole = users?.role;
+
+  const renderAdminContent = () => {
+    return (
+      <>
+        <UserButton />
+        {allUsers.map((user) => (
+          <div key={user.id}>
+            <p>Email: {user.email}</p>
+            <Select
+              value={user.role}
+              data={[
+                { value: "user", label: "User" },
+                { value: "pro", label: "Pro" },
+                { value: "admin", label: "Admin" },
+              ]}
+              onChange={(value: "user" | "pro" | "admin") =>
+                handleRoleChange(value, user.id)
+              }
+            />
+          </div>
+        ))}
+        <Button onClick={handleSaveChanges}>Save Changes</Button>
+      </>
+    );
+  };
+
+  const renderNonAdminContent = () => {
+    return publicToken ? (
+      <>
+        <UserButton />
+        <PlaidAuth
+          publicToken={publicToken}
+          account={account}
+          transactions={transactions as unknown as TransactionsResponse}
+          tableUsers={users as unknown as UserData}
+        />
+      </>
+    ) : (
+      <>
+        <button onClick={() => open()} disabled={!ready}>
+          Open Link and connect your bank!
+        </button>
+        <UserButton />
+      </>
+    );
+  };
+
+  // TODO: add a button to logout before and after the plaid flow, when they click that button it should log them out and redirect them to the root route
+
+  return userRole === "admin" ? renderAdminContent() : renderNonAdminContent();
 }

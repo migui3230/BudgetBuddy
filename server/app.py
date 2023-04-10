@@ -36,25 +36,6 @@ the value proposition of the app is that you can see all your accounts in one pl
 """
 
 
-@ app.route('/')
-def index():
-    db = get_db_connection()
-    cursor = db.cursor()
-    data = [
-        ('john.doe@example.com', 'johndoe'),
-        ('jane.smith@example.com', 'janesmith'),
-        ('jimmy.kim@example.com', 'jimmykim')
-    ]
-    for d in data:
-        cursor.execute(
-            "INSERT INTO users (email, username) VALUES (%s, %s)", d)
-
-    db.commit()
-    cursor.close()
-    db.close()
-    return 'data added!'
-
-
 @app.route('/api/addUser', methods=['POST'])
 def addUser():
     data = request.get_json()
@@ -95,6 +76,62 @@ def getUserByEmail():
         return jsonify(user)
     else:
         return jsonify({"error": "User not found"}), 404
+
+
+@app.route('/api/getAllUsers', methods=['GET'])
+def getAllUsers():
+    db = get_db_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    cursor.close()
+    db.close()
+
+    users = []
+    for row in rows:
+        user = {
+            "id": row[0],
+            "email": row[1],
+            "role": row[2]
+        }
+        users.append(user)
+    return jsonify(users)
+
+
+# TODO: create a route that will update all the users data based on the passed in data
+""" 
+shape of the data:
+
+[
+    {
+        email: "migui0323@gmail.com",
+        role: "pro".
+    }
+    {
+        email: "testing@gmail.com", 
+        role: "user",
+    }
+]
+"""
+
+
+@app.route('/api/updateUsers', methods=['POST'])
+def updateUsers():
+    data = request.get_json()
+    db = get_db_connection()
+    cursor = db.cursor()
+    for d in data:
+        cursor.execute(
+            "UPDATE users SET role = %s WHERE email = %s", (d['role'], d['email']))
+    db.commit()
+    cursor.close()
+    db.close()
+
+    response = {
+        "status": "success",
+        "message": "Users updated successfully"
+    }
+    return jsonify(response)
 
 
 if __name__ == '__main__':
