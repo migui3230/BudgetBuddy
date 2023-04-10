@@ -2,11 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { usePlaidLink } from "react-plaid-link";
 import { useUser, UserButton } from "@clerk/nextjs";
-import { useMemo } from "react";
 import React from "react";
-import { table } from "console";
 import { Select, Button } from "@mantine/core";
-import { Router, useRouter } from "next/router";
 
 type Balance = {
   available: number;
@@ -66,15 +63,9 @@ const PlaidAuthComponent = ({
   transactions,
   tableUsers: tableUser,
 }: PlaidAuthProps) => {
-  // filter for the specific user based on the clerk email
   const { user } = useUser();
-  // console.log(tableUser);
-  // wait 1 second
 
   const userRole = tableUser?.role;
-
-  // console.log("userRole", userRole);
-  // TODO: figure out how to log people out in clerk
 
   if (!account || !userRole) {
     return <p>loading...</p>;
@@ -276,8 +267,6 @@ export default function Plaid() {
       </>
     );
   };
-
-  // TODO: add a button to logout before and after the plaid flow, when they click that button it should log them out and redirect them to the root route
 
   return userRole === "admin" ? renderAdminContent() : renderNonAdminContent();
 }

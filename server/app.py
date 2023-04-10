@@ -23,13 +23,6 @@ def get_db_connection():
     return db
 
 
-# TODO: do role based access control for the model
-# TODO: change access to APIs based on the role
-# TODO: once the user logs in via clerk, fetch the data for that user
-
-# TODO: create a table for users that have username, email, role
-
-
 """ 
 the value proposition of the app is that you can see all your accounts in one place
 
@@ -96,23 +89,6 @@ def getAllUsers():
         }
         users.append(user)
     return jsonify(users)
-
-
-# TODO: create a route that will update all the users data based on the passed in data
-""" 
-shape of the data:
-
-[
-    {
-        email: "migui0323@gmail.com",
-        role: "pro".
-    }
-    {
-        email: "testing@gmail.com", 
-        role: "user",
-    }
-]
-"""
 
 
 @app.route('/api/updateUsers', methods=['POST'])
