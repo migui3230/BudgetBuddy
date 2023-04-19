@@ -3,6 +3,7 @@ import os
 from flask import Flask, jsonify, request, json
 from flask_cors import CORS
 from dotenv import load_dotenv
+import plaid
 load_dotenv()
 
 app = Flask(__name__)
@@ -21,12 +22,6 @@ def get_db_connection():
         }
     )
     return db
-
-
-""" 
-the value proposition of the app is that you can see all your accounts in one place
-
-"""
 
 
 @app.route('/api/addUser', methods=['POST'])
@@ -108,6 +103,68 @@ def updateUsers():
         "message": "Users updated successfully"
     }
     return jsonify(response)
+
+
+# PLAID_CLIENT_ID = os.environ.get('PLAID_CLIENT_ID')
+# PLAID_SECRET = os.environ.get('PLAID_SANDBOX_SECRET')
+# PLAID_ENV = os.environ.get('PLAID_ENV', 'sandbox')
+
+# client = plaid.ApiClient(client_id=PLAID_CLIENT_ID,
+#                          secret=PLAID_SECRET, environment=PLAID_ENV)
+
+
+# @app.route('/api/create_link_token', methods=['POST'])
+# def create_link_token():
+#     try:
+#         response = client.LinkToken.create({
+#             'client_name': 'Plaid Quickstart',
+#             'country_codes': ['US'],
+#             'language': 'en',
+#             'user': {
+#                 'client_user_id': '0',
+#             },
+#             'redirect_uri': 'http://localhost:3000/plaid/',
+#             'products': ['transactions'],
+#         })
+
+#         return jsonify(response), 200
+#     except plaid.errors.PlaidError as error:
+#         return jsonify({'error': str(error)}), 400
+
+
+# @app.route('/api/auth', methods=['POST'])
+# def auth():
+#     try:
+#         access_token = request.json['access_token']
+#         plaid_response = client.Auth.get(access_token)
+
+#         return jsonify(plaid_response), 200
+#     except plaid.errors.PlaidError as error:
+#         return jsonify({'error': str(error)}), 400
+
+
+# @app.route('/api/exchange_public_token', methods=['POST'])
+# def exchange_public_token():
+#     try:
+#         public_token = request.json['public_token']
+#         plaid_response = client.Item.public_token.exchange(public_token)
+
+#         access_token = plaid_response['access_token']
+#         return jsonify({'accessToken': access_token}), 200
+#     except plaid.errors.PlaidError as error:
+#         return jsonify({'error': str(error)}), 400
+
+
+# @app.route('/api/transactions', methods=['POST'])
+# def transactions():
+#     try:
+#         access_token = request.json['access_token']
+#         plaid_response = client.Transactions.get(
+#             access_token, start_date="2019-01-01", end_date="2020-01-31")
+
+#         return jsonify(plaid_response), 200
+#     except plaid.errors.PlaidError as error:
+#         return jsonify({'error': str(error)}), 400
 
 
 if __name__ == '__main__':
