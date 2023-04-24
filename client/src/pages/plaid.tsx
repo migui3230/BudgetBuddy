@@ -249,22 +249,88 @@ export default function Plaid() {
 
   const renderNonAdminContent = () => {
     return publicToken ? (
-      <>
-        <UserButton />
+      <div style={{ 
+        position: 'relative', 
+        minHeight: '100vh',   
+        minWidth: '100vw',
+        backgroundColor: '#00ff7f',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+
+      }}>
+        <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: '50%', 
+        transform: 'translateX(-50%)', 
+        fontSize: '64px', 
+        fontWeight: 'bold', 
+        margin: '2rem 0 1rem',
+        textAlign: 'center' 
+      }}>
+        Budget Buddy
+        <div style={{ fontSize: '24px', fontWeight: 'normal' }}>
+          Your Partner in Financial Success
+        </div>
+      </div>
         <PlaidAuth
           publicToken={publicToken}
           account={account}
           transactions={transactions as unknown as TransactionsResponse}
           tableUsers={users as unknown as UserData}
         />
-      </>
+        <div style={{ position: 'absolute', top: '5px', right: '20px' }}>
+          <UserButton style={{ fontSize: '24px', padding: '16px' }} />
+        </div>
+      </div>
     ) : (
-      <>
-        <button onClick={() => open()} disabled={!ready}>
+      <div style={{ 
+        position: 'relative', 
+        minHeight: '100vh', 
+        minWidth: '100vw', 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center',
+        backgroundColor: '#00ff7f',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        }}>
+        <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: '50%', 
+        transform: 'translateX(-50%)', 
+        fontSize: '64px', 
+        fontWeight: 'bold', 
+        margin: '2rem 0 1rem',
+        textAlign: 'center' 
+      }}>
+        Budget Buddy
+        <div style={{ fontSize: '24px', fontWeight: 'normal' }}>
+          Your Partner in Financial Success
+        </div>
+      </div>
+        <button 
+          onClick={() => open()} 
+          disabled={!ready} 
+          style={{ 
+            fontSize: '24px', 
+            padding: '16px',
+            backgroundColor: '#00bfff',
+            color: '#ffffff',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer' 
+            }}
+        >
           Open Link and connect your bank!
         </button>
-        <UserButton />
-      </>
+        <div style={{ position: 'absolute', top: '5px', right: '20px' }}>
+          <UserButton style={{ fontSize: '24px', padding: '16px' }} />
+        </div>
+      </div>
     );
   };
 
