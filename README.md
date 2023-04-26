@@ -29,7 +29,7 @@ There are three views
 
 - Chris Que and isaiah Alex
   - Frontend
-- Miguel
+- Miguel Sarenas
   - connected api to database
   - connected api to frontend
   - worked on most of the functionality
